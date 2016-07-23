@@ -53,6 +53,7 @@ class HumanPlayer(Player):
         self.all_user_ships = []
         self.all_occupied_points = []
         self.hit_points = []
+        self.all_opponent_guesses = []
 
         Player.__init__(self)
 
@@ -163,6 +164,12 @@ class HumanPlayer(Player):
             return True
         return False
 
+    def getGuesses(self):
+        return self.all_opponent_guesses
+
+    def addGuess(self, guess):
+        self.all_opponent_guesses.append(guess)
+
     def turn(self, opponent, other_window):
         is_repeat = True
         while is_repeat == True:
@@ -182,10 +189,17 @@ class HumanPlayer(Player):
 
 
 class ComputerPlayer(Player):
-    def __init__(self):
+    def __init__(self, difficulty):
         self.all_computer_ships = []
         self.all_occupied_points = []
         self.hit_points = []
+        self.difficulty = difficulty
+
+        self.found_target = False
+        self.last_point = None
+        self.remaining_directions = None
+        self.hitlen = 0
+        self.all_viable_points = {}
 
         Player.__init__(self)
 
@@ -207,7 +221,6 @@ class ComputerPlayer(Player):
 
         for ship in self.all_computer_ships:
             self.all_occupied_points += ship.getPoints()
-        print(self.all_occupied_points)
 
     def getAllSquares(self):
         return self.all_squares
@@ -248,14 +261,111 @@ class ComputerPlayer(Player):
         return False
 
     def turn(self, opponent, other_window):
-        square = random.choice(opponent.getAllSquares())
-        opponent.removeSquare(square)
-        opponent_points = opponent.getOccupiedPoints()
-        if square.getCoords() in opponent_points:
-            square.getMidpoint().changeColor('red', other_window)
-            opponent.hit(square.getCoords())
-        else:
-            square.getMidpoint().changeColor('white', other_window)
+        if self.difficulty == 1:
+            square = random.choice(opponent.getAllSquares())
+            opponent.removeSquare(square)
+            opponent_points = opponent.getOccupiedPoints()
+            if square.getCoords() in opponent_points:
+                square.getMidpoint().changeColor('red', other_window)
+                opponent.hit(square.getCoords())
+            else:
+                square.getMidpoint().changeColor('white', other_window)
+        elif self.difficulty == 2:
+            if not self.found_target:
+                square = random.choice(opponent.getAllSquares())
+                opponent.removeSquare(square)
+                opponent_points = opponent.getOccupiedPoints()
+                opponent.addGuess(square.getCoords())
+                if square.getCoords() in opponent_points:
+                    square.getMidpoint().changeColor('red', other_window)
+                    opponent.hit(square.getCoords())
+                    self.last_point = square.getCoords()
+                    self.remaining_directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+                    self.found_target = True
+                    self.hitlen = 0
+                    self.all_viable_points[self.last_point] = self.remaining_directions
+                else:
+                    square.getMidpoint().changeColor('white', other_window)
+            else:
+                next_point = None
+                while True:
+                    if not self.remaining_directions or self.remaining_directions == []:
+                        if self.last_point in self.all_viable_points:
+                            del self.all_viable_points[self.last_point]
+                        if self.all_viable_points:
+                            self.last_point = random.choice(self.all_viable_points.keys())
+                            self.remaining_directions = self.all_viable_points[self.last_point]
+                            self.turn(opponent, other_window)
+                            break
+                        else:
+                            self.found_target = False
+                            self.turn(opponent, other_window)
+                            break
+                    print(self.all_viable_points)
+                    print(self.remaining_directions)
+
+                    try:
+                        direction = random.choice(self.remaining_directions) 
+                        self.remaining_directions.remove(direction)                   
+                        next_point = (self.last_point[0] + direction[0], self.last_point[1] + direction[1])
+                        if next_point not in opponent.getGuesses():
+                            break
+                    except:
+                        if self.last_point in self.all_viable_points:
+                            del self.all_viable_points[self.last_point]
+                        if self.all_viable_points:
+                            self.last_point = random.choice(self.all_viable_points.keys())
+                            self.remaining_directions = self.all_viable_points[self.last_point]
+                            self.turn(opponent, other_window)
+                            break
+                        else:
+                            self.found_target = False
+                            self.turn(opponent, other_window)
+                            break
+
+
+                if next_point:
+                    if (1 <= next_point[0] <= 10) and (1 <= next_point[1] <= 10):
+                        opponent.addGuess(next_point)
+                        if next_point in opponent.getOccupiedPoints():
+                            for square in opponent.getAllSquares():
+                                if square.getCoords() == next_point:
+                                    opponent.removeSquare(square)
+                                    square.getMidpoint().changeColor('red', other_window)
+                                    opponent.hit(square.getCoords())
+                                    self.last_point = square.getCoords()
+                                    self.found_target = True
+                                    self.hitlen += 1
+                                    self.remaining_directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+                                    self.all_viable_points[self.last_point] = self.remaining_directions
+                                    break
+                        else:
+                            for square in opponent.getAllSquares():
+                                if square.getCoords() == next_point:
+                                    opponent.removeSquare(square)
+                                    square.getMidpoint().changeColor('white', other_window)
+                                    if not self.remaining_directions:
+                                        del self.all_viable_points[self.last_point]
+                                        if self.all_viable_points:
+                                            self.last_point = random.choice(self.all_viable_points.keys())
+                                            self.remaining_directions = self.all_viable_points[self.last_point]
+                                        else:
+                                            self.found_target = False
+                                    break
+                    else:
+                        if not self.remaining_directions:
+                            del self.all_viable_points[self.last_point]
+                            if self.all_viable_points:
+                                self.last_point = random.choice(self.all_viable_points.keys())
+                                self.remaining_directions = self.all_viable_points[self.last_point]
+                                self.turn(opponent, other_window)
+                            else:
+                                self.found_target = False
+                                self.turn(opponent, other_window)
+                        else:
+                            self.turn(opponent, other_window)
+
+
 
 
 
@@ -267,7 +377,7 @@ class GridPoint:
         self.p = None
 
     def draw(self, graphics_window):
-        self.p = Circle(Point(3 + 2 * self.x, 2 + 2 * self.y), .15)
+        self.p = Circle(Point(3 + 2 * self.x, 2 + 2 * self.y), .2)
         self.p.draw(graphics_window)
 
     def changeColor(self, color, graphics_window):
@@ -355,8 +465,15 @@ def main():
         else:
             print('Your size must be between 150 and 550! Please try again.\n')
 
+    while True:
+        diff = input('What CPU level do you want? (1: easy, 2: medium, 3: hard) ')
+        if (diff == 1) or (diff == 2) or (diff == 3):
+            break
+        else:
+            print('You must choose an appropriate difficulty!\n')
+
     user = HumanPlayer()
-    computer = ComputerPlayer()
+    computer = ComputerPlayer(diff)
 
     window = GraphWin("User BattleShip", size * 141 / 100.0, size * 131 / 100.0)
     window.setCoords(0, 0, 28, 28)
