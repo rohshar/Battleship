@@ -31,7 +31,6 @@ def main():
     computer.drawBoard(size, window2)
     computer.placeShips(window2)
 
-    finished = False
     while not user.hasLost() and not computer.hasLost():
         user.turn(computer, window2)
         computer.turn(user, window)

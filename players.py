@@ -6,12 +6,7 @@ import random
 class Player:
     def __init__(self):
         self.all_squares = []
-
-    def turn(self):
-        pass
-
-    def placeShips(self):
-        pass
+        self.parity_squares = []
 
     def drawBoard(self, size, window):
         rect = Rectangle(Point(2, 1), Point(22, 21))
@@ -26,6 +21,8 @@ class Player:
                 gs.draw(window)
                 gs.setMidpoint(gp)
                 self.all_squares.append(gs)
+                if (i % 2 == 0 and j % 2 == 0) or (i % 2 == 1 and j % 2 == 1):
+                    self.parity_squares.append(gs)
 
         Text(Point(1, 2), "J").draw(window)
         Text(Point(1, 4), "I").draw(window)
@@ -172,6 +169,13 @@ class HumanPlayer(Player):
     def addGuess(self, guess):
         self.all_opponent_guesses.append(guess)
 
+    def getParitySquares(self):
+        return self.parity_squares
+
+    def removeParitySquare(self, square):
+        if square in self.parity_squares:
+            self.parity_squares.remove(square)
+
     def turn(self, opponent, other_window):
         is_repeat = True
         while is_repeat == True:
@@ -200,26 +204,25 @@ class ComputerPlayer(Player):
         self.found_target = False
         self.last_point = None
         self.remaining_directions = None
-        self.hitlen = 0
         self.all_viable_points = {}
 
         Player.__init__(self)
 
     def placeShips(self, window):
         comp5 = self.placeShip(5, None)
-        comp5.draw(window)
+        #comp5.draw(window)
 
         comp4 = self.placeShip(4, [comp5])
-        comp4.draw(window)
+        #comp4.draw(window)
 
         comp3_1 = self.placeShip(3, [comp5, comp4])
-        comp3_1.draw(window)
+        #comp3_1.draw(window)
 
         comp3_2 = self.placeShip(3, [comp5, comp4, comp3_1])
-        comp3_2.draw(window)
+        #comp3_2.draw(window)
 
         comp2 = self.placeShip(2, [comp5, comp4, comp3_1, comp3_2])
-        comp2.draw(window)
+        #comp2.draw(window)
 
         for ship in self.all_computer_ships:
             self.all_occupied_points += ship.getPoints()
@@ -262,7 +265,30 @@ class ComputerPlayer(Player):
             return True
         return False
 
+    def hitAction(self, square, opponent, other_window):
+        square.getMidpoint().changeColor('red', other_window)
+        opponent.hit(square.getCoords())
+        self.last_point = square.getCoords()
+        self.remaining_directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        self.found_target = True
+        self.all_viable_points[self.last_point] = self.remaining_directions
+
+    def cleanDictionary(self, opponent, other_window):
+        if self.last_point in self.all_viable_points:
+            del self.all_viable_points[self.last_point]
+        if self.all_viable_points:
+            self.last_point = random.choice(self.all_viable_points.keys())
+            self.remaining_directions = self.all_viable_points[self.last_point]
+            self.turn(opponent, other_window)
+            return
+        else:
+            self.found_target = False
+            self.turn(opponent, other_window)
+            return
+
     def turn(self, opponent, other_window):
+
+        #random guessing
         if self.difficulty == 1:
             square = random.choice(opponent.getAllSquares())
             opponent.removeSquare(square)
@@ -272,6 +298,8 @@ class ComputerPlayer(Player):
                 opponent.hit(square.getCoords())
             else:
                 square.getMidpoint().changeColor('white', other_window)
+
+        #random guessing until a hit, then targets points blindly around it
         elif self.difficulty == 2:
             if not self.found_target:
                 square = random.choice(opponent.getAllSquares())
@@ -279,32 +307,15 @@ class ComputerPlayer(Player):
                 opponent_points = opponent.getOccupiedPoints()
                 opponent.addGuess(square.getCoords())
                 if square.getCoords() in opponent_points:
-                    square.getMidpoint().changeColor('red', other_window)
-                    opponent.hit(square.getCoords())
-                    self.last_point = square.getCoords()
-                    self.remaining_directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-                    self.found_target = True
-                    self.hitlen = 0
-                    self.all_viable_points[self.last_point] = self.remaining_directions
+                    self.hitAction(square, opponent, other_window)
                 else:
                     square.getMidpoint().changeColor('white', other_window)
             else:
                 next_point = None
                 while True:
                     if not self.remaining_directions or self.remaining_directions == []:
-                        if self.last_point in self.all_viable_points:
-                            del self.all_viable_points[self.last_point]
-                        if self.all_viable_points:
-                            self.last_point = random.choice(self.all_viable_points.keys())
-                            self.remaining_directions = self.all_viable_points[self.last_point]
-                            self.turn(opponent, other_window)
-                            break
-                        else:
-                            self.found_target = False
-                            self.turn(opponent, other_window)
-                            break
-                    print(self.all_viable_points)
-                    print(self.remaining_directions)
+                        self.cleanDictionary(opponent, other_window)
+                        break
 
                     try:
                         direction = random.choice(self.remaining_directions) 
@@ -313,18 +324,8 @@ class ComputerPlayer(Player):
                         if next_point not in opponent.getGuesses():
                             break
                     except:
-                        if self.last_point in self.all_viable_points:
-                            del self.all_viable_points[self.last_point]
-                        if self.all_viable_points:
-                            self.last_point = random.choice(self.all_viable_points.keys())
-                            self.remaining_directions = self.all_viable_points[self.last_point]
-                            self.turn(opponent, other_window)
-                            break
-                        else:
-                            self.found_target = False
-                            self.turn(opponent, other_window)
-                            break
-
+                        self.cleanDictionary(opponent, other_window)
+                        break
 
                 if next_point:
                     if (1 <= next_point[0] <= 10) and (1 <= next_point[1] <= 10):
@@ -333,13 +334,7 @@ class ComputerPlayer(Player):
                             for square in opponent.getAllSquares():
                                 if square.getCoords() == next_point:
                                     opponent.removeSquare(square)
-                                    square.getMidpoint().changeColor('red', other_window)
-                                    opponent.hit(square.getCoords())
-                                    self.last_point = square.getCoords()
-                                    self.found_target = True
-                                    self.hitlen += 1
-                                    self.remaining_directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-                                    self.all_viable_points[self.last_point] = self.remaining_directions
+                                    self.hitAction(square, opponent, other_window)
                                     break
                         else:
                             for square in opponent.getAllSquares():
@@ -355,15 +350,63 @@ class ComputerPlayer(Player):
                                             self.found_target = False
                                     break
                     else:
-                        if not self.remaining_directions:
-                            del self.all_viable_points[self.last_point]
-                            if self.all_viable_points:
-                                self.last_point = random.choice(self.all_viable_points.keys())
-                                self.remaining_directions = self.all_viable_points[self.last_point]
-                                self.turn(opponent, other_window)
-                            else:
-                                self.found_target = False
-                                self.turn(opponent, other_window)
-                        else:
-                            self.turn(opponent, other_window)
+                        self.turn(opponent, other_window)
 
+        #parity guessing, then targets points around it
+        elif self.difficulty == 3:
+            if not self.found_target:
+                if opponent.getParitySquares():
+                    square = random.choice(opponent.getParitySquares())
+                    opponent.removeParitySquare(square)
+                else:
+                    square = random.choice(opponent.getAllSquares())
+                opponent.removeSquare(square)
+                opponent_points = opponent.getOccupiedPoints()
+                opponent.addGuess(square.getCoords())
+                if square.getCoords() in opponent_points:
+                    self.hitAction(square, opponent, other_window)
+                else:
+                    square.getMidpoint().changeColor('white', other_window)
+            else:
+                next_point = None
+                while True:
+                    if not self.remaining_directions or self.remaining_directions == []:
+                        self.cleanDictionary(opponent, other_window)
+                        break
+
+                    try:
+                        direction = random.choice(self.remaining_directions) 
+                        self.remaining_directions.remove(direction)                   
+                        next_point = (self.last_point[0] + direction[0], self.last_point[1] + direction[1])
+                        if next_point not in opponent.getGuesses():
+                            break
+                    except:
+                        self.cleanDictionary(opponent, other_window)
+                        break
+
+                if next_point:
+                    if (1 <= next_point[0] <= 10) and (1 <= next_point[1] <= 10):
+                        opponent.addGuess(next_point)
+                        if next_point in opponent.getOccupiedPoints():
+                            for square in opponent.getAllSquares():
+                                if square.getCoords() == next_point:
+                                    opponent.removeSquare(square)
+                                    opponent.removeParitySquare(square)
+                                    self.hitAction(square, opponent, other_window)
+                                    break
+                        else:
+                            for square in opponent.getAllSquares():
+                                if square.getCoords() == next_point:
+                                    opponent.removeSquare(square)
+                                    opponent.removeParitySquare(square)
+                                    square.getMidpoint().changeColor('white', other_window)
+                                    if not self.remaining_directions:
+                                        del self.all_viable_points[self.last_point]
+                                        if self.all_viable_points:
+                                            self.last_point = random.choice(self.all_viable_points.keys())
+                                            self.remaining_directions = self.all_viable_points[self.last_point]
+                                        else:
+                                            self.found_target = False
+                                    break
+                    else:
+                        self.turn(opponent, other_window)
