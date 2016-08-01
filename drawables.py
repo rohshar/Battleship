@@ -66,6 +66,9 @@ class Ship:
     def getPoints(self):
         return self.allPoints
 
+    def getLength(self):
+        return self.length
+
     def checkOverlap(self, other_ship):
         other_points = other_ship.getPoints()
         for point in self.getPoints():
