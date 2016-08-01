@@ -224,6 +224,7 @@ class ComputerPlayer(Player):
         self.all_viable_points = {}
 
         self.naive_ordering = getSpotOrdering()
+        self.can_theorize = True
 
         Player.__init__(self)
 
@@ -596,15 +597,30 @@ class ComputerPlayer(Player):
         #calculate density matricies based on ships left and points guessed, and guess based on that
         elif self.difficulty == 5:
             if not self.found_target:
-                if opponent.getParitySquares():
+                if opponent.getParitySquares() and self.can_theorize:
                     numbers_mtx = get_placement_numbers(opponent.getGuesses(), opponent.getShipLengthsLeft())
+                    if numbers_mtx == None:
+                        self.can_theorize = False
+                        self.turn(opponent, other_window)
+                        return
                     priority_list = getSquareOrdering(numbers_mtx)
-                    #for n in numbers_mtx:
-                    #    print(n)
-                    #print(priority_list)
+                    if not priority_list:
+                        self.can_theorize = False
+                        self.turn(opponent, other_window)
+                        return
                     coords = priority_list.pop(0)
                     while coords in opponent.getGuesses():
                         coords = priority_list.pop(0)
+                    for square in opponent.getAllSquares():
+                        if square.getCoords() == coords:
+                            opponent.removeSquare(square)
+                            opponent.removeParitySquare(square)
+                            break
+
+                elif opponent.getParitySquares():
+                    coords = self.nextPriorityGuess()
+                    while coords in opponent.getGuesses():
+                        coords = self.nextPriorityGuess()
                     for square in opponent.getAllSquares():
                         if square.getCoords() == coords:
                             opponent.removeSquare(square)

@@ -2,8 +2,7 @@ from graphics import *
 from drawables import GridPoint, GridSquare, Ship
 from parse_matrix import getSpotOrdering
 from matrix_parser import getSquareOrdering
-#from ship_placement import get_placement_numbers
-import ship_placement
+from ship_placement import get_placement_numbers
 import random
 
 
@@ -11,8 +10,10 @@ class Player:
     def __init__(self):
         self.all_squares = []
         self.parity_squares = []
+        self.ships_left = [5, 4, 3, 3, 2]
 
     def drawBoard(self, size, window):
+
 
         for i in range(10):
             for j in range(10):
@@ -22,6 +23,13 @@ class Player:
                 self.all_squares.append(gs)
                 if (i % 2 == 0 and j % 2 == 0) or (i % 2 == 1 and j % 2 == 1):
                     self.parity_squares.append(gs)
+
+
+    def removeShip(self, length):
+        self.ships_left.remove(length)
+
+    def getShipLengthsLeft(self):
+        return self.ships_left
 
 class ComputerPlayer(Player):
     def __init__(self, difficulty):
@@ -37,51 +45,35 @@ class ComputerPlayer(Player):
         self.all_viable_points = {}
 
         self.naive_ordering = getSpotOrdering()
-
+        self.can_theorize = True
 
         Player.__init__(self)
 
     def placeShips(self, window):
-        comp5 = self.placeShip(5, None, None)
+        comp5 = self.placeShip(5, None)
         #comp5.draw(window)
 
-        comp4 = self.placeShip(4, [comp5], None)
+        comp4 = self.placeShip(4, [comp5])
         #comp4.draw(window)
 
-        comp3_1 = self.placeShip(3, [comp5, comp4], None)
+        comp3_1 = self.placeShip(3, [comp5, comp4])
         #comp3_1.draw(window)
 
-        comp3_2 = self.placeShip(3, [comp5, comp4, comp3_1], None)
+        comp3_2 = self.placeShip(3, [comp5, comp4, comp3_1])
         #comp3_2.draw(window)
 
-        comp2 = self.placeShip(2, [comp5, comp4, comp3_1, comp3_2], None)
+        comp2 = self.placeShip(2, [comp5, comp4, comp3_1, comp3_2])
         #comp2.draw(window)
 
         for ship in self.all_computer_ships:
             self.all_occupied_points += ship.getPoints()
 
-    def theoreticalShips(self, window, ship_lengths, occupied_points):
-        other_ships = []
-        for length in ship_lengths:
-            ship = self.placeShip(length, other_ships, occupied_points)
-            if ship == None:
-                return False
-            other_ships.append(ship)
-
-        for ship in self.all_computer_ships:
-            self.all_occupied_points += ship.getPoints()
-
-        return True
-
     def getAllSquares(self):
         return self.all_squares
 
-    def placeShip(self, length, other_ships, occupied_points):
-        counter = 0
+    def placeShip(self, length, other_ships):
         while True:
-            counter += 1
             overlapping = False
-            valid = True
             while True:
                 anchor_point = random.choice(self.all_squares)
                 directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
@@ -96,15 +88,9 @@ class ComputerPlayer(Player):
                     if other.checkOverlap(ship):
                         overlapping = True
                         break
-            if occupied_points is not None:
-                for point in occupied_points:
-                    if point in ship.getPoints():
-                        valid = False
-            if overlapping == False and valid == True:
+            if overlapping == False:
                 self.all_computer_ships.append(ship)
                 return ship
-            if counter == 100:
-                return None
 
     def getOccupiedPoints(self):
         return self.all_occupied_points
@@ -119,6 +105,12 @@ class ComputerPlayer(Player):
         if set(self.all_occupied_points) == set(self.hit_points):
             return True
         return False
+
+    def getShips(self):
+        return self.all_computer_ships
+
+    def sinkShip(self, ship):
+        self.all_computer_ships.remove(ship)
 
     def getParitySquares(self):
         return self.parity_squares
@@ -142,6 +134,10 @@ class ComputerPlayer(Player):
         self.remaining_directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
         self.found_target = True
         self.all_viable_points[self.last_point] = self.remaining_directions
+        for ship in opponent.getShips():
+            if set(ship.getPoints()).issubset(set(self.getGuesses())):
+                opponent.sinkShip(ship)
+                opponent.removeShip(ship.getLength())
 
     def cleanDictionary(self, opponent, other_window):
         if self.last_point in self.all_viable_points:
@@ -216,6 +212,62 @@ class ComputerPlayer(Player):
                     else:
                         self.turn(opponent, other_window)
 
+        #parity guessing, then targets points around it
+        elif self.difficulty == 2.5:
+            if not self.found_target:
+                if opponent.getParitySquares():
+                    square = random.choice(opponent.getParitySquares())
+                    opponent.removeParitySquare(square)
+                else:
+                    square = random.choice(opponent.getAllSquares())
+                opponent.removeSquare(square)
+                opponent_points = opponent.getOccupiedPoints()
+                opponent.addGuess(square.getCoords())
+                if square.getCoords() in opponent_points:
+                    self.hitAction(square, opponent, other_window)
+            else:
+                next_point = None
+                while True:
+                    if not self.remaining_directions or self.remaining_directions == []:
+                        self.cleanDictionary(opponent, other_window)
+                        break
+
+                    try:
+                        direction = random.choice(self.remaining_directions) 
+                        self.remaining_directions.remove(direction)                   
+                        next_point = (self.last_point[0] + direction[0], self.last_point[1] + direction[1])
+                        if next_point not in opponent.getGuesses():
+                            break
+                    except:
+                        self.cleanDictionary(opponent, other_window)
+                        break
+
+                if next_point:
+                    if (1 <= next_point[0] <= 10) and (1 <= next_point[1] <= 10):
+                        opponent.addGuess(next_point)
+                        if next_point in opponent.getOccupiedPoints():
+                            for square in opponent.getAllSquares():
+                                if square.getCoords() == next_point:
+                                    opponent.removeSquare(square)
+                                    opponent.removeParitySquare(square)
+                                    self.hitAction(square, opponent, other_window)
+                                    break
+                        else:
+                            for square in opponent.getAllSquares():
+                                if square.getCoords() == next_point:
+                                    opponent.removeSquare(square)
+                                    opponent.removeParitySquare(square)
+                                    if not self.remaining_directions:
+                                        del self.all_viable_points[self.last_point]
+                                        if self.all_viable_points:
+                                            self.last_point = random.choice(self.all_viable_points.keys())
+                                            self.remaining_directions = self.all_viable_points[self.last_point]
+                                        else:
+                                            self.found_target = False
+                                    break
+                    else:
+                        self.turn(opponent, other_window)
+
         #parity guessing, then targets points around it, when it gets a second hit, goes in that direction
         elif self.difficulty == 3:
             if not self.found_target:
@@ -277,6 +329,7 @@ class ComputerPlayer(Player):
                     else:
                         self.turn(opponent, other_window)
 
+        #guess based on most likely squares, target in one direction
         elif self.difficulty == 4:
             if not self.found_target:
                 if opponent.getParitySquares():
@@ -347,15 +400,34 @@ class ComputerPlayer(Player):
         #calculate density matricies based on ships left and points guessed, and guess based on that
         elif self.difficulty == 5:
             if not self.found_target:
-                if opponent.getParitySquares():
-                    numbers_mtx = ship_placement.get_placement_numbers(opponent.getGuesses(), opponent.getShipLengthsLeft())
+                if opponent.getParitySquares() and self.can_theorize:
+                    numbers_mtx = get_placement_numbers(opponent.getGuesses(), opponent.getShipLengthsLeft())
+                    if numbers_mtx == None:
+                        self.can_theorize = False
+                        self.turn(opponent, other_window)
+                        return
                     priority_list = getSquareOrdering(numbers_mtx)
                     #for n in numbers_mtx:
                     #    print(n)
                     #print(priority_list)
+                    if not priority_list:
+                        self.can_theorize = False
+                        self.turn(opponent, other_window)
+                        return
+
                     coords = priority_list.pop(0)
                     while coords in opponent.getGuesses():
                         coords = priority_list.pop(0)
+                    for square in opponent.getAllSquares():
+                        if square.getCoords() == coords:
+                            opponent.removeSquare(square)
+                            opponent.removeParitySquare(square)
+                            break
+
+                elif opponent.getParitySquares():
+                    coords = self.nextPriorityGuess()
+                    while coords in opponent.getGuesses():
+                        coords = self.nextPriorityGuess()
                     for square in opponent.getAllSquares():
                         if square.getCoords() == coords:
                             opponent.removeSquare(square)
@@ -429,3 +501,4 @@ class ComputerPlayer(Player):
                                     break
                     else:
                         self.turn(opponent, other_window)
+        

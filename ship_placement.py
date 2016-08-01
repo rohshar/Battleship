@@ -2,11 +2,8 @@ from drawables import GridPoint, GridSquare, Ship
 from players_test import ComputerPlayer
 
 
-w, h = 10, 10 
-ship_placement = [[0 for x in range(w)] for y in range(h)] 
-def place_ships(guesses, ship_lengths):
-    global ship_placement
 
+def place_ships(guesses, ship_lengths, ship_placement):
     size = 300
 
     diff = 4 
@@ -18,13 +15,16 @@ def place_ships(guesses, ship_lengths):
     window = None
 
     player1.drawBoard(size, window)
-    player1.theoreticalShips(window, ship_lengths, guesses)
+    check = player1.theoreticalShips(window, ship_lengths, guesses)
     p1_points = player1.getOccupiedPoints()
 
     window2 = None
     player2.drawBoard(size, window2)
-    player2.theoreticalShips(window2, ship_lengths, guesses)
+    check2 = player2.theoreticalShips(window2, ship_lengths, guesses)
     p2_points = player2.getOccupiedPoints()
+
+    if check == False or check2 == False:
+        return False
     
     
     for point in p1_points:
@@ -36,8 +36,13 @@ def place_ships(guesses, ship_lengths):
 
 
 def get_placement_numbers(guesses, ship_lengths):
+    w, h = 10, 10 
+    ship_placement = [[0 for x in range(w)] for y in range(h)]
     for i in range(100):
-        place_ships(guesses, ship_lengths)
+        check = place_ships(guesses, ship_lengths, ship_placement)
+        if check == False:
+            return None
+
     return ship_placement
 
     #print(str(player1_wins) + ": player1")    

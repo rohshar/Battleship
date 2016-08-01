@@ -1,11 +1,11 @@
-5848: parity, directional surrounding hunt mode
-4152: parity, all surrounding hunt mode
+5848: parity guessing, directional surrounding hunt mode
+4152: parity guessing, all surrounding hunt mode
 
-6574: parity, directional surrounding hunt mode
-3426: no parity, all surrounding hunt mode
+6574: parity guessing, directional surrounding hunt mode
+3426: random guessing, all surrounding hunt mode
 
-9742: parity, directional surrounding hunt mode
-258: no parity, random targeting
+9742: parity guessing, directional surrounding hunt mode
+258: random guessing, random targeting
 
 Ship Placement: 
 [74196, 109035, 137024, 150981, 157879, 157764, 150919, 137176, 109538, 74055]
@@ -19,22 +19,9 @@ Ship Placement:
 [108732, 140316, 165339, 178677, 184015, 184461, 178537, 165708, 140464, 109730]
 [74171, 109521, 137236, 150839, 157256, 156760, 150067, 136453, 108910, 74180]
 
-
-5205: probability matrix guessing, directional surrounding hunt mode
+5205: guessing based on initial probability matrix, directional surrounding hunt mode
 4795: parity guessing, directional surrounding hunt mode
 
-56: probability matrix guessing, directional surrounding hunt mode
-44: parity guessing, directional surrounding hunt mode
-
-54: probability matrix guessing, directional surrounding hunt mode
-46: parity guessing, directional surrounding hunt mode
-
-53: probability matrix guessing, directional surrounding hunt mode
-47: parity guessing, directional surrounding hunt mode
-
-54: probability matrix guessing, directional surrounding hunt mode
-46: parity guessing, directional surrounding hunt mode
-
-43: probability matrix guessing, directional surrounding hunt mode
-57: parity guessing, directional surrounding hunt mode
+57: probability density matrix dynamic guessing, directional surrounding hunt mode
+43: guessing based on initial probability matrix, directional surrounding hunt mode
 
