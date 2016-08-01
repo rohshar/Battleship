@@ -1,6 +1,8 @@
 from graphics import *
 from drawables import GridPoint, GridSquare, Ship
 from parse_matrix import getSpotOrdering
+from matrix_parser import getSquareOrdering
+from ship_placement import get_placement_numbers
 import random
 
 
@@ -48,8 +50,11 @@ class Player:
         Text(Point(19, 22), "9").draw(window)
         Text(Point(21, 22), "10").draw(window)
 
-    def removeShip(self, ship):
-        self.ships_left.remove(ship)
+    def removeShip(self, length):
+        self.ships_left.remove(length)
+
+    def getShipLengthsLeft(self):
+        return self.ships_left
 
 
 class HumanPlayer(Player):
@@ -309,9 +314,9 @@ class ComputerPlayer(Player):
         self.found_target = True
         self.all_viable_points[self.last_point] = self.remaining_directions
         for ship in opponent.getShips():
-            if set(ship.getPoints()).issubset(set(self.getGuesses)):
-                print("Sank the ship of length: " + str(ship.getLength()))
-                opponent.ships
+            if set(ship.getPoints()).issubset(set(self.getGuesses())):
+                opponent.sinkShip(ship)
+                opponent.removeShip(ship.getLength())
 
     def cleanDictionary(self, opponent, other_window):
         if self.last_point in self.all_viable_points:
@@ -592,14 +597,29 @@ class ComputerPlayer(Player):
         elif self.difficulty == 5:
             if not self.found_target:
                 if opponent.getParitySquares():
-                    coords = self.nextPriorityGuess()
+                    numbers_mtx = get_placement_numbers(opponent.getGuesses(), opponent.getShipLengthsLeft())
+                    priority_list = getSquareOrdering(numbers_mtx)
+                    #for n in numbers_mtx:
+                    #    print(n)
+                    #print(priority_list)
+                    coords = priority_list.pop(0)
                     while coords in opponent.getGuesses():
-                        coords = self.nextPriorityGuess()
+                        coords = priority_list.pop(0)
                     for square in opponent.getAllSquares():
                         if square.getCoords() == coords:
                             opponent.removeSquare(square)
                             opponent.removeParitySquare(square)
                             break
+
+
+                    #coords = self.nextPriorityGuess()
+                    #while coords in opponent.getGuesses():
+                    #    coords = self.nextPriorityGuess()
+                    #for square in opponent.getAllSquares():
+                    #    if square.getCoords() == coords:
+                    #        opponent.removeSquare(square)
+                    #        opponent.removeParitySquare(square)
+                    #        break
                 else:
                     square = random.choice(opponent.getAllSquares())
                     opponent.removeSquare(square)
@@ -641,6 +661,10 @@ class ComputerPlayer(Player):
                                     self.remaining_directions = [direction]
                                     self.found_target = True
                                     self.all_viable_points[self.last_point] = self.remaining_directions
+                                    for ship in opponent.getShips():
+                                        if set(ship.getPoints()).issubset(set(opponent.getGuesses())):
+                                            opponent.sinkShip(ship)
+                                            opponent.removeShip(ship.getLength())
                                     break
                         else:
                             for square in opponent.getAllSquares():

@@ -39,20 +39,29 @@ class ComputerPlayer(Player):
         Player.__init__(self)
 
     def placeShips(self, window):
-        comp5 = self.placeShip(5, None)
+        comp5 = self.placeShip(5, None, None)
         #comp5.draw(window)
 
-        comp4 = self.placeShip(4, [comp5])
+        comp4 = self.placeShip(4, [comp5], None)
         #comp4.draw(window)
 
-        comp3_1 = self.placeShip(3, [comp5, comp4])
+        comp3_1 = self.placeShip(3, [comp5, comp4], None)
         #comp3_1.draw(window)
 
-        comp3_2 = self.placeShip(3, [comp5, comp4, comp3_1])
+        comp3_2 = self.placeShip(3, [comp5, comp4, comp3_1], None)
         #comp3_2.draw(window)
 
-        comp2 = self.placeShip(2, [comp5, comp4, comp3_1, comp3_2])
+        comp2 = self.placeShip(2, [comp5, comp4, comp3_1, comp3_2], None)
         #comp2.draw(window)
+
+        for ship in self.all_computer_ships:
+            self.all_occupied_points += ship.getPoints()
+
+    def theoreticalShips(self, window, ship_lengths, occupied_points):
+        other_ships = []
+        for length in ship_lengths:
+            ship = self.placeShip(length, other_ships, occupied_points)
+            other_ships.append(ship)
 
         for ship in self.all_computer_ships:
             self.all_occupied_points += ship.getPoints()
@@ -60,9 +69,10 @@ class ComputerPlayer(Player):
     def getAllSquares(self):
         return self.all_squares
 
-    def placeShip(self, length, other_ships):
+    def placeShip(self, length, other_ships, occupied_points):
         while True:
             overlapping = False
+            valid = True
             while True:
                 anchor_point = random.choice(self.all_squares)
                 directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
@@ -77,7 +87,11 @@ class ComputerPlayer(Player):
                     if other.checkOverlap(ship):
                         overlapping = True
                         break
-            if overlapping == False:
+            if occupied_points is not None:
+                for point in occupied_points:
+                    if point in ship.getPoints():
+                        valid = False
+            if overlapping == False and valid == True:
                 self.all_computer_ships.append(ship)
                 return ship
 
