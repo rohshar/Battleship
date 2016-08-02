@@ -3,7 +3,7 @@ from players_test import ComputerPlayer
 
 
 
-def place_ships(guesses, ship_lengths, ship_placement):
+def placeShipsTest(guesses, ship_lengths, ship_placement):
     size = 300
 
     diff = 4 
@@ -35,11 +35,11 @@ def place_ships(guesses, ship_lengths, ship_placement):
 
 
 
-def get_placement_numbers(guesses, ship_lengths):
+def getPlacementNumbers(guesses, ship_lengths):
     w, h = 10, 10 
     ship_placement = [[0 for x in range(w)] for y in range(h)]
     for i in range(100):
-        check = place_ships(guesses, ship_lengths, ship_placement)
+        check = placeShipsTest(guesses, ship_lengths, ship_placement)
         if check == False:
             return None
 

@@ -59,12 +59,12 @@ class Ship:
         self.coord1 = coord1
         self.coord2 = coord2
         self.increment = increment
-        self.allPoints = []
+        self.all_points = []
         for i in range(length):
-            self.allPoints.append((self.coord1[0] + increment[0] * i, self.coord1[1] + increment[1] * i))
+            self.all_points.append((self.coord1[0] + increment[0] * i, self.coord1[1] + increment[1] * i))
 
     def getPoints(self):
-        return self.allPoints
+        return self.all_points
 
     def getLength(self):
         return self.length

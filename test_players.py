@@ -2,7 +2,7 @@ from graphics import *
 from drawables import GridPoint, GridSquare, Ship
 from parse_matrix import getSpotOrdering
 from matrix_parser import getSquareOrdering
-from ship_placement import get_placement_numbers
+from ship_placement import getPlacementNumbers
 import random
 
 
@@ -401,7 +401,7 @@ class ComputerPlayer(Player):
         elif self.difficulty == 5:
             if not self.found_target:
                 if opponent.getParitySquares() and self.can_theorize:
-                    numbers_mtx = get_placement_numbers(opponent.getGuesses(), opponent.getShipLengthsLeft())
+                    numbers_mtx = getPlacementNumbers(opponent.getGuesses(), opponent.getShipLengthsLeft())
                     if numbers_mtx == None:
                         self.can_theorize = False
                         self.turn(opponent, other_window)

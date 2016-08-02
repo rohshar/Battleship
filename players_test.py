@@ -2,7 +2,6 @@ from graphics import *
 from drawables import GridPoint, GridSquare, Ship
 from parse_matrix import getSpotOrdering
 from matrix_parser import getSquareOrdering
-#from ship_placement import get_placement_numbers
 import ship_placement
 import random
 
