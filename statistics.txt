@@ -22,7 +22,7 @@ Ship Placement:
 5205: guessing based on initial probability matrix, directional surrounding hunt mode
 4795: parity guessing, directional surrounding hunt mode
 
-57: probability density matrix dynamic guessing, directional surrounding hunt mode
-43: guessing based on initial probability matrix, directional surrounding hunt mode
+559: probability density matrix dynamic guessing, directional surrounding hunt mode
+441: guessing based on initial probability matrix, directional surrounding hunt mode
 
 

@@ -5,14 +5,12 @@ from test_players import ComputerPlayer
 player1_wins = 0
 player2_wins = 0
 w, h = 10, 10 
-counter = 0
 ship_placement = [[0 for x in range(w)] for y in range(h)] 
 def main():
     global player1_wins
     global player2_wins
-    global counter
-    size = 300
 
+    size = 300
     option = 3
     diff = 5 
     diff2 = 4
@@ -39,18 +37,9 @@ def main():
         player2_wins += 1
     else:
         player1_wins += 1
-    
-    
-    #for point in p1_points:
-    #    ship_placement[point[0] - 1][point[1] - 1] += 1
-    #for point in p2_points:
-    #    ship_placement[point[0] - 1][point[1] - 1] += 1
-
-
-
 
 if __name__ == '__main__':
-    for i in range(1000):
+    for i in range(5):
         print(i)
         main()
     print('')

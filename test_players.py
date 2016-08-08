@@ -12,13 +12,12 @@ class Player:
         self.parity_squares = []
         self.ships_left = [5, 4, 3, 3, 2]
 
-    def drawBoard(self, size, window):
-
+    def drawBoard(self, window):
 
         for i in range(10):
             for j in range(10):
-                gp = GridPoint(i, j, size)
-                gs = GridSquare(i, j, size)
+                gp = GridPoint(i, j)
+                gs = GridSquare(i, j)
                 gs.setMidpoint(gp)
                 self.all_squares.append(gs)
                 if (i % 2 == 0 and j % 2 == 0) or (i % 2 == 1 and j % 2 == 1):
@@ -434,15 +433,6 @@ class ComputerPlayer(Player):
                             opponent.removeParitySquare(square)
                             break
 
-
-                    #coords = self.nextPriorityGuess()
-                    #while coords in opponent.getGuesses():
-                    #    coords = self.nextPriorityGuess()
-                    #for square in opponent.getAllSquares():
-                    #    if square.getCoords() == coords:
-                    #        opponent.removeSquare(square)
-                    #        opponent.removeParitySquare(square)
-                    #        break
                 else:
                     square = random.choice(opponent.getAllSquares())
                     opponent.removeSquare(square)

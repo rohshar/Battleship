@@ -4,6 +4,9 @@ from graphics import *
 
 
 def main():
+    """
+    Contains the logic that gets user input and executes the actual BattleShip game.
+    """
     while True:
         size = input('How large do you want the BattleShip window to be? (from 150-550 px) ')
         if (150 <= size <= 550):
@@ -46,12 +49,12 @@ def main():
 
     window = GraphWin("User BattleShip", size * 141 / 100.0, size * 131 / 100.0)
     window.setCoords(0, 0, 28, 28)
-    player1.drawBoard(size, window)
+    player1.drawBoard(window)
     player1.placeShips(window)
 
     window2 = GraphWin("Computer BattleShip", size * 121 / 100.0, size * 111 / 100.0)
     window2.setCoords(0, 0, 23, 23)
-    player2.drawBoard(size, window2)
+    player2.drawBoard(window2)
     player2.placeShips(window2)
 
     while not player1.hasLost() and not player2.hasLost():
