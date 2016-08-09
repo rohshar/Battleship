@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from drawables import GridPoint, GridSquare, Ship
 from test_players import ComputerPlayer
 
@@ -15,16 +17,16 @@ def main():
     diff = 5 
     diff2 = 4
 
-    player1 = ComputerPlayer(diff) # probability matrix guessing, one dirction targeting
-    player2 = ComputerPlayer(diff2) # parity guessing, on direction targeting
+    player1 = ComputerPlayer(diff) 
+    player2 = ComputerPlayer(diff2) 
 
     window = None
-    player1.drawBoard(size, window)
+    player1.drawBoard(window)
     player1.placeShips(window)
     p1_points = player1.getOccupiedPoints()
 
     window2 = None
-    player2.drawBoard(size, window2)
+    player2.drawBoard(window2)
     player2.placeShips(window2)
     p2_points = player2.getOccupiedPoints()
 

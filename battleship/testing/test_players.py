@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 from graphics import *
 from drawables import GridPoint, GridSquare, Ship
 from parse_matrix import getSpotOrdering

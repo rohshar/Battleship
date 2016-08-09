@@ -24,5 +24,3 @@ Ship Placement:
 
 559: probability density matrix dynamic guessing, directional surrounding hunt mode
 441: guessing based on initial probability matrix, directional surrounding hunt mode
-
-
