@@ -2,8 +2,15 @@ from graphics import *
 import tkinter as tk
 
 
-class SampleApp(tk.Tk):
+class InputApp(tk.Tk):
+    """
+    Creates a window that allows the user to input all of his choices to create the game.
+    """
     def __init__(self):
+        """
+        Creates the window where the user will input his or her choices
+        :return:
+        """
         tk.Tk.__init__(self)
         self.wm_title("Input Stage")
         self.label1 = tk.Label(self, text='How large do you want the BattleShip window to be? (from 150-550 px)')
@@ -25,6 +32,10 @@ class SampleApp(tk.Tk):
         self.button.pack()
 
     def on_button(self):
+        """
+        Gets the user's input and makes sure it is valid
+        :return:
+        """
         size = int(self.entry1.get())
         option = int(self.entry2.get())
         diff = None
@@ -48,11 +59,14 @@ class SampleApp(tk.Tk):
 
         print("You must input appropriate choices!")
         self.destroy()
-        app = SampleApp()
+        app = InputApp()
         app.mainloop()
 
 
 def instruct():
+    """
+    Creates a window that displays all of the instructions.
+    """
     helper=GraphWin("Instructions", 500, 500)
     helper.setBackground('Pink')
     helper.setCoords(0, 0, 10, 10)
@@ -74,41 +88,41 @@ def instruct():
     helper.close()
 
 def start():
-
+    """
+    Creates a window GUI display that allows the user to choose whether to proceed or get instructions.
+    """
     p = Point(0, 0)
     img = Image(p, "battle1.gif")
-
     width = img.getWidth()
     height = img.getHeight()
+    img.move(width / 2, height / 2)
 
-    img.move(width/2,height/2)
-
-    intro=GraphWin("Intro Page", width, height)
+    intro = GraphWin("Intro Page", width, height)
     img.draw(intro)
-    btext=Text(Point(250, 75), "Battleship")
+    btext = Text(Point(250, 75), "Battleship")
     btext.setSize(20)
     btext.setStyle('bold italic')
     btext.draw(intro)
-    srec=Rectangle(Point(200,150), Point(300, 200))
+    srec = Rectangle(Point(200,150), Point(300, 200))
     srec.setFill("coral")
     srec.draw(intro)
-    stext=Text(Point(250, 175), "Start")
+    stext = Text(Point(250, 175), "Start")
     stext.setFill("black")
     stext.draw(intro)
-    irec=Rectangle(Point(200, 250), Point(300, 300))
+    irec = Rectangle(Point(200, 250), Point(300, 300))
     irec.setFill("coral")
     irec.draw(intro)
-    itext=Text(Point(250, 275), "Instructions")
+    itext = Text(Point(250, 275), "Instructions")
     itext.setFill("black")
     itext.draw(intro)
 
     while True:
-        p=intro.getMouse()
-        x=p.getX()
-        y=p.getY()
-        if 200<x<300 and 150<y<200:
+        p = intro.getMouse()
+        x = p.getX()
+        y = p.getY()
+        if 200 < x < 300 and 150 < y < 200:
             intro.close()
             return True
-        if 200<x<300 and 250<y<300:
+        if 200 < x < 300 and 250 < y < 300:
             intro.close()
             return False

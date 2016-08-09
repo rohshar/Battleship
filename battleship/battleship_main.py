@@ -1,7 +1,8 @@
 from drawables import GridPoint, GridSquare, Ship
 from players import HumanPlayer, ComputerPlayer
-from intro_gui_utils import start, instruct, SampleApp
+from intro_gui_utils import start, instruct, InputApp
 from graphics import *
+
 
 def main():
     """
@@ -48,7 +49,7 @@ def main():
     else:
         check = start()
         if check:
-            app = SampleApp()
+            app = InputApp()
             app.mainloop()
             size = app.size
             option = app.option
