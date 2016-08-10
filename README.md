@@ -14,4 +14,5 @@ Additionally, you can choose between a:
 Clone the directory and from the outer BattleShip folder, run the command "python battleship_main.py"
 
 #Game Screenshots
-![alt tag](http://i64.tinypic.com/2dliyk0.png)
+![alt tag](http://i63.tinypic.com/20gzn61.png)
+![alt tag](http://i67.tinypic.com/2kg091.png)
