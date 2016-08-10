@@ -12,3 +12,6 @@ Additionally, you can choose between a:
 
 #Running
 Clone the directory and from the outer BattleShip folder, run the command "python battleship_main.py"
+
+#Game Screenshots
+![alt tag](http://i64.tinypic.com/2dliyk0.png)
