@@ -11,7 +11,7 @@ Additionally, you can choose between a:
 - Text input interface
 
 #Running
-Clone the directory and from the outer BattleShip folder, run the command "python battleship_main.py"
+Clone the directory and from inside the inner battleship folder, run the command "python battleship_main.py"
 
 #Game Screenshots
 Intro Screen <br />
